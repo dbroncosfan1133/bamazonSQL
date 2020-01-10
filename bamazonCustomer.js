@@ -13,22 +13,29 @@ var connection = mysql.createConnection({
     database: data.database
 });
 
-inquirer.prompt([
+connection.connect(function (err) {
+    if (err) throw err;
+    startApp();
+})
 
-    {
-        type: "list",
-        name: "userChoice",
-        message: "What would you like to do?",
-        choices: ["View products for sale", "Leave"]
-    }
+function startApp() {
+    inquirer.prompt([
 
-]).then(function (userChoice) {
-    if (userChoice.userChoice === "View products for sale") {
-        showProducts()
-    } else {
-        connection.end();
-    }
-});
+        {
+            type: "list",
+            name: "userChoice",
+            message: "What would you like to do?",
+            choices: ["View products for sale", "Leave"]
+        }
+
+    ]).then(function (userChoice) {
+        if (userChoice.userChoice === "View products for sale") {
+            showProducts()
+        } else {
+            connection.end();
+        }
+    });
+}
 
 function showProducts() {
     var productTable = new Table({
@@ -41,19 +48,42 @@ function showProducts() {
                 productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity]);
             });
             console.log("\n" + "\n" + productTable.toString() + "\n");
+            purchaseItem();
         });
 
-    inquirer.prompt([
+    function purchaseItem() {
+        connection.query("SELECT * FROM products", function (err, result) {
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "shopList",
+                    message: "What would you like to purchase?",
+                    choices: function () {
+                        var choiceList = [];
+                        for (var i = 0; i < result.length; i++) {
+                            choiceList.push(result[i].product_name);
+                        }
+                        return choiceList;
+                    }
+                },
 
-        {
-            type: "confirm",
-            name: "confirmChoice",
-            message: "Would you like to quit?"
-        }
+                {
+                    type: "input",
+                    name: "howMany",
+                    message: "How many would you like?"
+                },
 
-    ]).then(function (confirmChoice) {
-        if (confirmChoice.confirmChoice === true) {
-            connection.end();
-        }
-    })
+                {
+                    type: "confirm",
+                    name: "confirmChoice",
+                    message: "Would you like to quit?"
+                }
+
+            ]).then(function (confirmChoice) {
+                if (confirmChoice.confirmChoice === true) {
+                    connection.end();
+                }
+            })
+        })
+    }
 }
