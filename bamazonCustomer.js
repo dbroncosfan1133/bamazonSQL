@@ -97,7 +97,8 @@ function finalizePurchase(itemNum, howMany) {
     connection.query(query, [itemNum.itemNum], function (err, result) {
         if (err) throw err;
         var stockRemain = result[0].stock_quantity - howMany;
-        console.log("Your total is: $" + result[0].price * howMany);
+        var productSales = result[0].price * howMany;
+        console.log("Your total is: $" + productSales);
         updateStock(itemNum.itemNum, stockRemain);
     })
 };
