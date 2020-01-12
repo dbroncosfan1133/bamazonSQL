@@ -30,8 +30,8 @@ function startApp() {
 
     ]).then(function (userChoice) {
         if (userChoice.userChoice === "View products for sale") {
-            showProducts()
-        } else {
+            showProducts();
+        } else if (userChoice.userChoice === "Leave") {
             connection.end();
         }
     });
@@ -50,40 +50,61 @@ function showProducts() {
             console.log("\n" + "\n" + productTable.toString() + "\n");
             purchaseItem();
         });
-
-    function purchaseItem() {
-        connection.query("SELECT * FROM products", function (err, result) {
-            inquirer.prompt([
-                {
-                    type: "list",
-                    name: "shopList",
-                    message: "What would you like to purchase?",
-                    choices: function () {
-                        var choiceList = [];
-                        for (var i = 0; i < result.length; i++) {
-                            choiceList.push(result[i].product_name);
-                        }
-                        return choiceList;
-                    }
-                },
-
-                {
-                    type: "input",
-                    name: "howMany",
-                    message: "How many would you like?"
-                },
-
-                {
-                    type: "confirm",
-                    name: "confirmChoice",
-                    message: "Would you like to quit?"
-                }
-
-            ]).then(function (confirmChoice) {
-                if (confirmChoice.confirmChoice === true) {
-                    connection.end();
-                }
-            })
-        })
-    }
 }
+
+function purchaseItem() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "itemNum",
+            message: "Please enter an Item ID to purchase. (Press q to quit)",
+            validate: function (value) {
+                if(value === "q") {
+                    connection.end();
+                } else {
+                    return true;
+                }
+            }
+        },
+        {
+            type: "input",
+            name: "howMany",
+            message: "How many would you like to purchase?"
+        }
+    ]).then(function (itemNum) {
+
+        var query = "SELECT * FROM products WHERE item_id = ?";
+
+        connection.query(query, [itemNum.itemNum], function (err, result) {
+            if (err) throw err;
+            if (itemNum.howMany > result[0].stock_quantity) {
+                console.log("Sorry, we do not have that many...");
+                startApp();
+            } else {
+                console.log("Thank you for your purchase!!");
+                finalizePurchase(itemNum, itemNum.howMany);
+            }
+        })
+    })
+};
+
+function finalizePurchase(itemNum, howMany) {
+    connection.query("SELECT * FROM products WHERE item_id = ?",
+        [itemNum.itemNum], function (err, result) {
+            if (err) throw err;
+            var stockRemain = result[0].stock_quantity - howMany;
+            console.log("Your total is: $" + result[0].price * howMany)
+            updateStock(itemNum.itemNum, stockRemain);
+        })
+};
+
+function updateStock(item_Id, stockRemain) {
+    connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?;",
+        [stockRemain, item_Id],
+        function (err) {
+            if (err) throw err;
+            console.log("Stock has been updated!");
+            startApp();
+        })
+}
+
