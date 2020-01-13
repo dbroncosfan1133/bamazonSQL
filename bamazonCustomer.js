@@ -97,20 +97,22 @@ function finalizePurchase(itemNum, howMany) {
     connection.query(query, [itemNum.itemNum], function (err, result) {
         if (err) throw err;
         var stockRemain = result[0].stock_quantity - howMany;
-        var productSales = result[0].price * howMany;
-        console.log("Your total is: $" + productSales);
-        updateStock(itemNum.itemNum, stockRemain);
+        var sales = parseFloat(result[0].product_sales + (result[0].price * howMany));
+        console.log("Your total is: $" + sales);
+        updateStock(itemNum.itemNum, stockRemain, sales);
     })
 };
 
-function updateStock(item_Id, stockRemain) {
+function updateStock(item_Id, stockRemain, totalSales) {
 
-    var query = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
+    var query = "UPDATE products SET stock_quantity = ? , product_sales = ? WHERE item_id = ?";
 
-    connection.query(query, [stockRemain, item_Id], function (err) {
+    connection.query(query, [stockRemain, totalSales, item_Id], function (err) {
         if (err) throw err;
         console.log("Stock has been updated! \n");
         startApp();
     })
+
+    connection.query("SELECT * FROM products ")
 }
 

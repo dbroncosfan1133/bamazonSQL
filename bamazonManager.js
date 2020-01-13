@@ -59,7 +59,7 @@ function startApp() {
 
 function showProducts() {
     var productTable = new Table({
-        head: [' ID ', ' Product ', ' Department ', ' Price ', ' Stock '],
+        head: [' Item ID: ', ' Product: ', ' Department: ', ' Price: ', ' Stock: ', 'Total Sales:'],
     });
 
     var query = "SELECT * FROM products";
@@ -67,7 +67,7 @@ function showProducts() {
     connection.query(query, function (err, result) {
         if (err) throw err;
         result.forEach(function (column) {
-            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity]);
+            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity, '$' + column.product_sales]);
         });
         console.log("\n" + "\n" + productTable.toString() + "\n");
         startApp();
@@ -76,7 +76,7 @@ function showProducts() {
 
 function lowInventory() {
     var productTable = new Table({
-        head: [' ID ', ' Product ', ' Department ', ' Price ', ' Stock '],
+        head: [' ID: ', ' Product: ', ' Department: ', ' Price: ', ' Stock: ', 'Total Sales:'],
     });
 
     var query = "SELECT * FROM products WHERE stock_quantity < 5";
@@ -84,7 +84,7 @@ function lowInventory() {
     connection.query(query, function (err, result) {
         if (err) throw err;
         result.forEach(function (column) {
-            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity])
+            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity, '$' + column.product_sales])
         });
         console.log("\n" + productTable.toString() + "\n");
         startApp();
