@@ -71,7 +71,13 @@ function purchaseItem() {
         {
             type: "input",
             name: "howMany",
-            message: "How many would you like to purchase?"
+            message: "How many would you like to purchase?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
+                }
+                return false;
+            }
         }
     ]).then(function (itemNum) {
 
@@ -98,7 +104,7 @@ function finalizePurchase(itemNum, howMany) {
         if (err) throw err;
         var stockRemain = result[0].stock_quantity - howMany;
         var sales = parseFloat(result[0].product_sales + (result[0].price * howMany));
-        console.log("Your total is: $" + sales);
+        console.log("Your total is: $" + result[0].price * howMany);
         updateStock(itemNum.itemNum, stockRemain, sales);
     })
 };
@@ -107,12 +113,14 @@ function updateStock(item_Id, stockRemain, totalSales) {
 
     var query = "UPDATE products SET stock_quantity = ? , product_sales = ? WHERE item_id = ?";
 
-    connection.query(query, [stockRemain, totalSales, item_Id], function (err) {
-        if (err) throw err;
-        console.log("Stock has been updated! \n");
-        startApp();
-    })
+    connection.query(query, [stockRemain,
+        totalSales,
+        item_Id],
+        function (err) {
+            if (err) throw err;
+            console.log("Stock has been updated! \n");
+            startApp();
+        })
 
     connection.query("SELECT * FROM products ")
-}
-
+};

@@ -67,9 +67,14 @@ function showProducts() {
     connection.query(query, function (err, result) {
         if (err) throw err;
         result.forEach(function (column) {
-            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity, '$' + column.product_sales]);
+            productTable.push([column.item_id, 
+                column.product_name, 
+                column.department_name, 
+                '$' + column.price, 
+                column.stock_quantity, 
+                '$' + column.product_sales]);
         });
-        console.log("\n" + "\n" + productTable.toString() + "\n");
+        console.log("\n" + productTable.toString() + "\n");
         startApp();
     });
 };
@@ -84,7 +89,12 @@ function lowInventory() {
     connection.query(query, function (err, result) {
         if (err) throw err;
         result.forEach(function (column) {
-            productTable.push([column.item_id, column.product_name, column.department_name, '$' + column.price, column.stock_quantity, '$' + column.product_sales])
+            productTable.push([column.item_id, 
+                column.product_name, 
+                column.department_name, 
+                '$' + column.price, 
+                column.stock_quantity, 
+                '$' + column.product_sales])
         });
         console.log("\n" + productTable.toString() + "\n");
         startApp();
@@ -131,7 +141,14 @@ function addNewProduct () {
         {
             type: "input",
             name: "prodName",
-            message: "Enter the Products name.."
+            message: "Enter the Products name..",
+            validate: function (value) {
+                if (value === "q") {
+                    connection.end();
+                } else {
+                    return true;
+                }
+            }
         },
 
         {
