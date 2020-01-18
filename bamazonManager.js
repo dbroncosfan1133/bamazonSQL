@@ -1,10 +1,13 @@
+//Dependencies required to run app
 require("dotenv").config();
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var Table = require("cli-table");
 
+//stores process.env as variable
 var data = process.env;
 
+//Creates connection to SQL Server, information is pulled from local .env file
 var connection = mysql.createConnection({
     host: data.host,
     port: data.port,
@@ -13,11 +16,13 @@ var connection = mysql.createConnection({
     database: data.database
 });
 
+//Connects to the SQL server and starts the app
 connection.connect(function (err) {
     if (err) throw err;
     startApp();
 })
 
+//This starts the app and asks the user what they would like to do
 function startApp() {
     inquirer.prompt([
 
@@ -57,6 +62,7 @@ function startApp() {
     })
 };
 
+//This queries the database and returns a list of products for sale
 function showProducts() {
     var productTable = new Table({
         head: [' Item ID: ', ' Product: ', ' Department: ', ' Price: ', ' Stock: ', 'Total Sales:'],
@@ -79,6 +85,7 @@ function showProducts() {
     });
 };
 
+//This function queries the database and returns items with an inventory of less than 5
 function lowInventory() {
     var productTable = new Table({
         head: [' ID: ', ' Product: ', ' Department: ', ' Price: ', ' Stock: ', 'Total Sales:'],
@@ -101,6 +108,7 @@ function lowInventory() {
     });
 };
 
+//This function will allow the manager to update the quantity on hand of specific items
 function addInventory() {
     inquirer.prompt([
         {
@@ -136,6 +144,8 @@ function addInventory() {
     })
 };
 
+
+//This function will allow the manager to add new products.  It will ask for some required information and update the database with the new data
 function addNewProduct () {
     inquirer.prompt([
         {

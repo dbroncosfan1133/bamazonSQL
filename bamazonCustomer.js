@@ -1,10 +1,13 @@
+//Dependencies required to run app
 require("dotenv").config();
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var Table = require("cli-table");
 
+//stores process.env as variable
 var data = process.env;
 
+//Creates connection to SQL Server, information is pulled from local .env file
 var connection = mysql.createConnection({
     host: data.host,
     port: data.port,
@@ -13,11 +16,13 @@ var connection = mysql.createConnection({
     database: data.database
 });
 
+//Connects to the SQL server and starts the app
 connection.connect(function (err) {
     if (err) throw err;
     startApp();
 })
 
+//This starts the app and asks the user what they would like to do
 function startApp() {
     inquirer.prompt([
 
@@ -37,6 +42,7 @@ function startApp() {
     });
 }
 
+//This queries the database and returns a list of products for sale
 function showProducts() {
     var productTable = new Table({
         head: [' ID ', ' Product ', ' Department ', ' Price ', ' Stock '],
@@ -54,6 +60,10 @@ function showProducts() {
     });
 }
 
+//This will allow the user to enter an item to purchase and how many
+//It then runs a function that queries the database, checks stock on hand and will allow the user to 
+//purchase the items if enough is in stock or will fail due to the customer trying to purchase more than
+//is in inventory
 function purchaseItem() {
     inquirer.prompt([
         {
@@ -96,6 +106,7 @@ function purchaseItem() {
     })
 };
 
+//This is ran if purchaseItem() is successful.  It will query the database and return the total amount due for purchase
 function finalizePurchase(itemNum, howMany) {
 
     var query = "SELECT * FROM products WHERE item_id = ?";
@@ -109,6 +120,8 @@ function finalizePurchase(itemNum, howMany) {
     })
 };
 
+//This function is ran after finalizePurchase is complete.  It will update the database
+//and decrease the stock_quantity value.  It will then restart the app.
 function updateStock(item_Id, stockRemain, totalSales) {
 
     var query = "UPDATE products SET stock_quantity = ? , product_sales = ? WHERE item_id = ?";

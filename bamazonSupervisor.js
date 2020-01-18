@@ -1,10 +1,13 @@
+//Dependencies required to run app
 require("dotenv").config();
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var Table = require("cli-table");
 
+//stores process.env as variable
 var data = process.env;
 
+//Creates connection to SQL Server, information is pulled from local .env file
 var connection = mysql.createConnection({
     host: data.host,
     port: data.port,
@@ -13,11 +16,13 @@ var connection = mysql.createConnection({
     database: data.database
 });
 
+//Connects to the SQL server and starts the app
 connection.connect(function (err) {
     if (err) throw err;
     startApp();
 })
 
+//This starts the app and asks the user what they would like to do
 function startApp() {
     inquirer.prompt([
 
@@ -47,6 +52,7 @@ function startApp() {
     })
 };
 
+//This function will query the database and return a table of all departments and their respective over head costs, gross sales, and net sales values
 function showDepartMetrics() {
     var departmentTable = new Table({
         head: [' Department ID: ', ' Department: ', ' Over Head Cost: ', ' Department Sales: ', 'Net Profit:'],
@@ -68,6 +74,9 @@ function showDepartMetrics() {
     })
 };
 
+
+//This function will query the database and return a table containing all of the departments and the Over Head Costs
+//It will then run the new departments function.  This will let the user see what current departments are already stored
 function showDepartments() {
     var departmentTable = new Table({
         head: [' Department ID: ', ' Department: ', 'Over Head Cost: '],
@@ -87,6 +96,8 @@ function showDepartments() {
     });
 };
 
+//This function will prompt the user for information about the new department being created and update
+//the database with the new department information
 function newDepartment() {
     inquirer.prompt([
         {
